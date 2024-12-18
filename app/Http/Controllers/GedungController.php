@@ -21,10 +21,7 @@ class GedungController extends Controller
                       ->where('end_date', '>=', $requestDate);
                 });
             })
-            ->where('status', '!=', 'CANCELLED')
             ->pluck('gedung_id');
-            
-            // Exclude booked buildings from the query
             $query->whereNotIn('id', $bookedGedungIds);
         }
         

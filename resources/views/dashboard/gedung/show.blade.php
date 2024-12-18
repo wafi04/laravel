@@ -99,10 +99,10 @@
                 <div class="mt-4">
                     @auth
                         @if(auth()->id() == $gedung->user_id)
-                            <a href="{{ route('gedung.edit', $gedung) }}" class="btn btn-primary me-2">
+                            <a href="{{ route('dashboard.gedung.edit', $gedung) }}" class="btn btn-primary me-2">
                                 Edit Gedung
                             </a>
-                            <form action="{{ route('gedung.destroy', $gedung) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus gedung ini?')">
+                            <form action="{{ route('dashboard.gedung.destroy', $gedung) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus gedung ini?')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger">

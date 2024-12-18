@@ -15,7 +15,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('gedung.store') }}" method="POST" class="p-6 space-y-6">
+            <form action="{{ route('dashboard.gedung.store') }}" method="POST" class="p-6 space-y-6">
                 @csrf
 
                 <div class="grid grid-cols-1 gap-4">

@@ -15,7 +15,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('gedung.update', $gedung->id) }}" method="POST" class="p-6 space-y-6">
+            <form action="{{ route('dashboard.gedung.update', $gedung->id) }}" method="POST" class="p-6 space-y-6">
                 @csrf
                 @method('PUT')
 
@@ -75,7 +75,7 @@
                             class="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-2 px-6 rounded-full hover:opacity-90 transition duration-300">
                         Perbarui Gedung
                     </button>
-                    <a href="{{ route('gedung.index') }}" 
+                    <a href="{{ route('dashboard.gedung.index') }}" 
                        class="text-blue-600 hover:underline">
                         Kembali ke Daftar
                     </a>

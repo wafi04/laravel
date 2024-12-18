@@ -20,7 +20,6 @@
         </button>
         <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
             <ul class="navbar-nav gap-2 align-items-center">
-                <!-- Authenticated User -->
                 @auth
                     @if(auth()->user()->role === 'admin')
                         <li class="nav-item">

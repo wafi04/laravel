@@ -209,92 +209,92 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function openPaymentModal(element) {
-            const bookingId = element.getAttribute('data-booking-id');
-            const totalHarga = element.getAttribute('data-total-harga');
-            
-            document.getElementById('modalBookingId').value = bookingId;
-            document.getElementById('modalTotalHarga').value = 'Rp ' + new Intl.NumberFormat('id-ID').format(totalHarga);
-            
-            document.getElementById('paymentForm').addEventListener('submit', function(event) {
-                let hargaInput = document.getElementById('modalTotalHarga');
-                let cleanedHarga = hargaInput.value.replace('Rp ', '').replace(/\./g, '');
-                hargaInput.value = cleanedHarga;
-            });
-            
-            var paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
-            paymentModal.show();
-        }
+      document.addEventListener('DOMContentLoaded', function() {
+        const paymentMethodSelect = document.querySelector('select[name="metode"]');
+        const qrisContainer = document.getElementById('qris-container');
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const paymentMethodSelect = document.querySelector('select[name="metode"]');
-            const qrisContainer = document.getElementById('qris-container');
-            let qrisGenerationTimeout = null;
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';
+        script.onload = initQRCodeGeneration;
+        document.head.appendChild(script);
 
-            paymentMethodSelect.addEventListener('change', function() {
-                if (qrisGenerationTimeout) {
-                    clearTimeout(qrisGenerationTimeout);
-                }
+    function initQRCodeGeneration() {
+        paymentMethodSelect.addEventListener('change', function() {
+            qrisContainer.classList.add('d-none');
+            qrisContainer.innerHTML = '';
 
-                qrisContainer.classList.add('d-none');
-                qrisContainer.innerHTML = '';
-
-                if (this.value === 'QRIS') {
-                    qrisGenerationTimeout = setTimeout(() => {
-                        generateQRISQRCode();
-                    }, 1000);
-                }
-            });
-
-            function generateQRISQRCode() {
-                const bookingId = document.getElementById('modalBookingId').value;
-                const hargaInput = document.getElementById('modalTotalHarga');
-                
-                const cleanedHarga = parseFloat(
-                    hargaInput.value
-                        .replace('Rp ', '')
-                        .replace(/\./g, '')
-                        .replace(',', '.')
-                );
-
-                if (isNaN(cleanedHarga) || cleanedHarga <= 0) {
-                    alert('Harga tidak valid');
-                    return;
-                }
-                
-                fetch(`/payments/generate-qris-qrcode/${bookingId}/${cleanedHarga}`, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(error => {
-                            throw new Error(error.details || 'QR Code Generation Failed');
-                        });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    qrisContainer.innerHTML = `
-                        <div class="text-center p-4 bg-light rounded">
-                            <h3 class="mb-3">Scan QRIS</h3>
-                            <img src="${data.qrCodePath}" alt="QRIS QR Code" class="img-fluid mx-auto mb-3" style="max-width: 250px;">
-                            <div class="text-muted small">
-                                Akan submit dalam 10 detik
-                            </div>
-                        </div>
-                    `;
-                    qrisContainer.classList.remove('d-none');
-                })
-                .catch(error => {
-                    console.error('QR Code Generation Error:', error);
-                    alert('Gagal membuat QR Code: ' + error.message);
-                });
+            if (this.value === 'QRIS') {
+                generateQRISQRCode();
             }
         });
+    }
+
+    function generateQRISQRCode() {
+        const bookingId = document.getElementById('modalBookingId').value;
+        const hargaInput = document.getElementById('modalTotalHarga');
+        
+        const cleanedHarga = parseFloat(
+            hargaInput.value
+                .replace('Rp ', '')
+                .replace(/\./g, '')
+                .replace(',', '.')
+        );
+
+        if (isNaN(cleanedHarga) || cleanedHarga <= 0) {
+            alert('Harga tidak valid');
+            return;
+        }
+
+        const qrisData = generateQRISString(bookingId, cleanedHarga);
+        
+        const qr = qrcode(0, 'M');
+        qr.addData(qrisData);
+        qr.make();
+
+        qrisContainer.innerHTML = `
+            <div class="text-center p-4 bg-light rounded">
+                <h3 class="mb-3">Scan QRIS</h3>
+                <div class="mx-auto mb-3" style="max-width: 250px;">
+                    ${qr.createImgTag(5)}
+                </div>
+              
+            </div>
+        `;
+        qrisContainer.classList.remove('d-none');
+    }
+
+    function generateQRISString(bookingId, harga) {
+        const timestamp = new Date().toISOString();
+        return JSON.stringify({
+            bookingId: bookingId,
+            amount: harga,
+            timestamp: timestamp,
+            merchantId: 'GEDUNGKU_MERCHANT',
+            version: '1.0'
+        });
+    }
+});
+
+function openPaymentModal(element) {
+    const bookingId = element.getAttribute('data-booking-id');
+    const totalHarga = element.getAttribute('data-total-harga');
+    
+    document.getElementById('modalBookingId').value = bookingId;
+    document.getElementById('modalTotalHarga').value = 'Rp ' + new Intl.NumberFormat('id-ID').format(totalHarga);
+    
+    const qrisContainer = document.getElementById('qris-container');
+    qrisContainer.classList.add('d-none');
+    qrisContainer.innerHTML = '';
+    
+    document.getElementById('paymentForm').addEventListener('submit', function(event) {
+        let hargaInput = document.getElementById('modalTotalHarga');
+        let cleanedHarga = hargaInput.value.replace('Rp ', '').replace(/\./g, '');
+        hargaInput.value = cleanedHarga;
+    });
+    
+    var paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+    paymentModal.show();
+}
     </script>
 </body>
 </html>
